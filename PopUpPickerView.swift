@@ -2,13 +2,15 @@ class PopUpPickerView: UIView {
     var pickerView: UIPickerView!
     var pickerToolbar: UIToolbar!
     var toolbarItems: [UIBarItem]!
-    private var selectedRows: [Int]?
+    
     var delegate: PopUpPickerViewDelegate? {
         didSet {
             pickerView.delegate = delegate
         }
     }
+    private var selectedRows: [Int]?
     
+    // MARK: Initializer
     override init() {
         super.init()
         initFunc()
@@ -51,7 +53,6 @@ class PopUpPickerView: UIView {
         self.addSubview(pickerToolbar)
         self.addSubview(pickerView)
     }
-    
     func showPicker() {
         if selectedRows == nil {
             selectedRows = getSelectedRows()
@@ -68,10 +69,9 @@ class PopUpPickerView: UIView {
     }
     func endPicker() {
         hidePicker()
-        delegate?.pickerView(pickerView, didSelect: getSelectedRows())
+        delegate?.pickerView?(pickerView, didSelect: getSelectedRows())
         selectedRows = nil
     }
-    
     private func hidePicker() {
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
@@ -92,6 +92,7 @@ class PopUpPickerView: UIView {
     }
 }
 
+@objc
 protocol PopUpPickerViewDelegate: UIPickerViewDelegate {
-    func pickerView(pickerView: UIPickerView, didSelect numbers: [Int])
+    optional func pickerView(pickerView: UIPickerView, didSelect numbers: [Int])
 }
