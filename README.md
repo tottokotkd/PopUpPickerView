@@ -22,12 +22,16 @@ class ViewController: UIViewController, PopUpPickerViewDelegate {
 
         pickerView = PopUpPickerView()
         pickerView.delegate = self
-        self.view.addSubview(pickerView)
+        if let window = UIApplication.sharedApplication().keyWindow {
+            window.addSubview(pickerView)
+        } else {
+            self.view.addSubview(pickerView)
+        }
         
         let button = UIButton.buttonWithType(UIButtonType.ContactAdd) as UIButton
         button.frame = CGRectMake(50, 100, 30, 30);
         button.addTarget(self, action: "showPicker", forControlEvents: UIControlEvents.TouchDown)
-        UIApplication.sharedApplication().keyWindow!.addSubview(pickerViewTester)`
+        self.view.addSubview(button)
     }
     func showPicker() {
         pickerView.showPicker()
