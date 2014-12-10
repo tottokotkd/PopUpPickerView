@@ -1,5 +1,11 @@
-
 class PopUpPickerView: UIView {
+    func printInfo() {
+        println("PopUpPickerView.printInfo()")
+        println("self:\n\tbounds: \(self.bounds)\n\tframe: \(self.frame)")
+        println("pickerView:\n\tbounds: \(pickerView.bounds)\n\tframe: \(pickerView.frame)")
+        
+    }
+    
     var pickerView: UIPickerView!
     var pickerToolbar: UIToolbar!
     var toolbarItems: [UIBarItem]!
@@ -36,15 +42,22 @@ class PopUpPickerView: UIView {
         pickerView.showsSelectionIndicator = true
         pickerView.backgroundColor = UIColor.whiteColor()
         
+        self.bounds = CGRectMake(0, 0, screenSize.width, 260)
         self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260)
+        
+        pickerToolbar.bounds = CGRectMake(0, 0, screenSize.width, 44)
         pickerToolbar.frame = CGRectMake(0, 0, screenSize.width, 44)
+        
+        pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
         pickerView.frame = CGRectMake(0, 44, screenSize.width, 216)
         
-
+        
+        let space = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FixedSpace, target: nil, action: nil)
+        space.width = 12
         let cancelItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: "cancelPicker")
         let flexSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: self, action: nil)
         let doneButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: Selector("endPicker"))
-        toolbarItems! += [cancelItem, flexSpaceItem, doneButtonItem]
+        toolbarItems! += [space, cancelItem, flexSpaceItem, doneButtonItem, space]
         
         pickerToolbar.setItems(toolbarItems, animated: false)
         self.addSubview(pickerToolbar)
