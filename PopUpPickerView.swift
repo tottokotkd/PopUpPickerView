@@ -1,23 +1,14 @@
 class PopUpPickerView: UIView {
-    func printInfo() {
-        println("PopUpPickerView.printInfo()")
-        println("self:\n\tbounds: \(self.bounds)\n\tframe: \(self.frame)")
-        println("pickerView:\n\tbounds: \(pickerView.bounds)\n\tframe: \(pickerView.frame)")
-        
-    }
-    
     var pickerView: UIPickerView!
     var pickerToolbar: UIToolbar!
     var toolbarItems: [UIBarItem]!
-    
+    private var selectedRows: [Int]?
     var delegate: PopUpPickerViewDelegate? {
         didSet {
             pickerView.delegate = delegate
         }
     }
-    private var selectedRows: [Int]?
     
-    // MARK: Initializer
     override init() {
         super.init()
         initFunc()
@@ -44,13 +35,10 @@ class PopUpPickerView: UIView {
         
         self.bounds = CGRectMake(0, 0, screenSize.width, 260)
         self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260)
-        
         pickerToolbar.bounds = CGRectMake(0, 0, screenSize.width, 44)
         pickerToolbar.frame = CGRectMake(0, 0, screenSize.width, 44)
-        
         pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
         pickerView.frame = CGRectMake(0, 44, screenSize.width, 216)
-        
         
         let space = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FixedSpace, target: nil, action: nil)
         space.width = 12
@@ -63,6 +51,7 @@ class PopUpPickerView: UIView {
         self.addSubview(pickerToolbar)
         self.addSubview(pickerView)
     }
+    
     func showPicker() {
         if selectedRows == nil {
             selectedRows = getSelectedRows()
@@ -82,6 +71,7 @@ class PopUpPickerView: UIView {
         delegate?.pickerView(pickerView, didSelect: getSelectedRows())
         selectedRows = nil
     }
+    
     private func hidePicker() {
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
