@@ -1,3 +1,4 @@
+
 class PopUpPickerView: UIView {
     var pickerView: UIPickerView!
     var pickerToolbar: UIToolbar!
@@ -8,7 +9,7 @@ class PopUpPickerView: UIView {
             pickerView.delegate = delegate
         }
     }
-    private var selectedRows: [Int]!
+    private var selectedRows: [Int]?
     
     // MARK: Initializer
     override init() {
@@ -50,7 +51,9 @@ class PopUpPickerView: UIView {
         self.addSubview(pickerView)
     }
     func showPicker() {
-        selectedRows = getSelectedRows()
+        if selectedRows == nil {
+            selectedRows = getSelectedRows()
+        }
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
             self.frame = CGRectMake(0, screenSize.height - 260.0, screenSize.width, 260.0)
@@ -59,10 +62,12 @@ class PopUpPickerView: UIView {
     func cancelPicker() {
         hidePicker()
         restoreSelectedRows()
+        selectedRows = nil
     }
     func endPicker() {
         hidePicker()
         delegate?.pickerView(pickerView, didSelect: getSelectedRows())
+        selectedRows = nil
     }
     private func hidePicker() {
         let screenSize = UIScreen.mainScreen().bounds.size
@@ -78,8 +83,8 @@ class PopUpPickerView: UIView {
         return selectedRows
     }
     private func restoreSelectedRows() {
-        for i in 0..<selectedRows.count {
-            pickerView.selectRow(selectedRows[i], inComponent: i, animated: false)
+        for i in 0..<selectedRows!.count {
+            pickerView.selectRow(selectedRows![i], inComponent: i, animated: true)
         }
     }
 }
