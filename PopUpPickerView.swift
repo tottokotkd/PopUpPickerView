@@ -1,17 +1,33 @@
 import UIKit
+#if !RX_NO_MODULE
+    import RxSwift
+    import RxCocoa
+#endif
 
 class PopUpPickerView: UIView {
 
     var pickerView: UIPickerView!
     var pickerToolbar: UIToolbar!
     var toolbarItems = [UIBarButtonItem]()
+    lazy var doneButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: #selector(PopUpPickerView.endPicker))
+    }()
+    lazy var itemSelected: Driver<[Int]> = {
+        return self.doneButtonItem.rx_tap.asDriver()
+            .startWith()
+            .map { _ in
+                self.hidePicker()
+                self.selectedRows = nil
+                return self.getSelectedRows()
+            }
+    }()
 
     var delegate: PopUpPickerViewDelegate? {
         didSet {
             pickerView.delegate = delegate
         }
     }
-    private var selectedRows: [Int]?
+    internal var selectedRows: [Int]?
 
     // MARK: Initializer
     init() {
@@ -51,7 +67,6 @@ class PopUpPickerView: UIView {
         space.width = 12
         let cancelItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: #selector(PopUpPickerView.cancelPicker))
         let flexSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: self, action: nil)
-        let doneButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: #selector(PopUpPickerView.endPicker))
         toolbarItems = [space, cancelItem, flexSpaceItem, doneButtonItem, space]
 
         pickerToolbar.setItems(toolbarItems, animated: false)
@@ -82,14 +97,14 @@ class PopUpPickerView: UIView {
         selectedRows = nil
     }
 
-    private func hidePicker() {
+    func hidePicker() {
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
             self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260.0)
         }
     }
 
-    private func getSelectedRows() -> [Int] {
+    internal func getSelectedRows() -> [Int] {
         var selectedRows = [Int]()
         for i in 0..<pickerView.numberOfComponents {
             selectedRows.append(pickerView.selectedRowInComponent(i))
