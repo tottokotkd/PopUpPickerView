@@ -14,12 +14,12 @@ class PopUpPickerView: UIView {
     }()
     lazy var itemSelected: Driver<[Int]> = {
         return self.doneButtonItem.rx_tap.asDriver()
-            .startWith()
             .map { _ in
                 self.hidePicker()
                 self.selectedRows = nil
                 return self.getSelectedRows()
             }
+            .startWith(self.selectedRows ?? [])
     }()
 
     var delegate: PopUpPickerViewDelegate? {
@@ -43,6 +43,11 @@ class PopUpPickerView: UIView {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         initFunc()
+    }
+
+    convenience init(rows: [Int]) {
+        self.init()
+        selectedRows = rows
     }
 
     private func initFunc() {
