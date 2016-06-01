@@ -84,6 +84,11 @@ class PopUpPickerView: UIView {
         if selectedRows == nil {
             selectedRows = getSelectedRows()
         }
+        if let selectedRows = selectedRows {
+            for (component, row) in selectedRows.enumerate() {
+                pickerView.selectRow(row, inComponent: component, animated: false)
+            }
+        }
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
             self.frame = CGRectMake(0, screenSize.height - 260.0, screenSize.width, 260.0)
