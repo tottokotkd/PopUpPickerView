@@ -62,7 +62,7 @@ class PopUpPickerView: UIView {
         pickerView.backgroundColor = UIColor.whiteColor()
 
         self.bounds = CGRectMake(0, 0, screenSize.width, 260)
-        self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260)
+        self.frame = CGRectMake(0, parentViewHeight(), screenSize.width, 260)
         pickerToolbar.bounds = CGRectMake(0, 0, screenSize.width, 44)
         pickerToolbar.frame = CGRectMake(0, 0, screenSize.width, 44)
         pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
@@ -91,7 +91,7 @@ class PopUpPickerView: UIView {
         }
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, screenSize.height - 260.0, screenSize.width, 260.0)
+            self.frame = CGRectMake(0, self.parentViewHeight() - 260.0, screenSize.width, 260.0)
         }
     }
 
@@ -110,7 +110,7 @@ class PopUpPickerView: UIView {
     func hidePicker() {
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260.0)
+            self.frame = CGRectMake(0, self.parentViewHeight(), screenSize.width, 260.0)
         }
     }
 
@@ -126,6 +126,10 @@ class PopUpPickerView: UIView {
         for i in 0..<selectedRows!.count {
             pickerView.selectRow(selectedRows![i], inComponent: i, animated: true)
         }
+    }
+
+    private func parentViewHeight() -> CGFloat {
+        return superview?.frame.height ?? UIScreen.mainScreen().bounds.size.height
     }
 
 }
