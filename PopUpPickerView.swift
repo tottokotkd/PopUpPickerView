@@ -123,8 +123,9 @@ class PopUpPickerView: UIView {
     }
 
     private func restoreSelectedRows() {
-        for i in 0..<selectedRows!.count {
-            pickerView.selectRow(selectedRows![i], inComponent: i, animated: true)
+        guard let selectedRows = selectedRows else { return }
+        for i in 0..<selectedRows.count {
+            pickerView.selectRow(selectedRows[i], inComponent: i, animated: true)
         }
     }
 
