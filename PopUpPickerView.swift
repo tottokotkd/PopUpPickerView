@@ -4,14 +4,9 @@ import UIKit
     import RxCocoa
 #endif
 
-class PopUpPickerView: UIView {
+class PopUpPickerView: PopUpPickerViewBase {
 
     var pickerView: UIPickerView!
-    var pickerToolbar: UIToolbar!
-    var toolbarItems = [UIBarButtonItem]()
-    lazy var doneButtonItem: UIBarButtonItem = {
-        return UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: #selector(PopUpPickerView.endPicker))
-    }()
     lazy var itemSelected: Driver<[Int]> = {
         return self.doneButtonItem.rx_tap.asDriver()
             .map { _ in
@@ -30,8 +25,8 @@ class PopUpPickerView: UIView {
     internal var selectedRows: [Int]?
 
     // MARK: Initializer
-    init() {
-        super.init(frame: CGRect.zero)
+    override init() {
+        super.init()
         initFunc()
     }
 
@@ -52,35 +47,18 @@ class PopUpPickerView: UIView {
 
     private func initFunc() {
         let screenSize = UIScreen.mainScreen().bounds.size
-        self.backgroundColor = UIColor.blackColor()
 
-        pickerToolbar = UIToolbar()
         pickerView = UIPickerView()
-
-        pickerToolbar.translucent = true
         pickerView.showsSelectionIndicator = true
         pickerView.backgroundColor = UIColor.whiteColor()
-
-        self.bounds = CGRectMake(0, 0, screenSize.width, 260)
-        self.frame = CGRectMake(0, parentViewHeight(), screenSize.width, 260)
-        pickerToolbar.bounds = CGRectMake(0, 0, screenSize.width, 44)
-        pickerToolbar.frame = CGRectMake(0, 0, screenSize.width, 44)
         pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
         pickerView.frame = CGRectMake(0, 44, screenSize.width, 216)
 
-        let space = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FixedSpace, target: nil, action: nil)
-        space.width = 12
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: #selector(PopUpPickerView.cancelPicker))
-        let flexSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: self, action: nil)
-        toolbarItems = [space, cancelItem, flexSpaceItem, doneButtonItem, space]
-
-        pickerToolbar.setItems(toolbarItems, animated: false)
-        self.addSubview(pickerToolbar)
         self.addSubview(pickerView)
     }
 
     // MARK: Actions
-    func showPicker() {
+    override func showPicker() {
         if selectedRows == nil {
             selectedRows = getSelectedRows()
         }
@@ -95,23 +73,16 @@ class PopUpPickerView: UIView {
         }
     }
 
-    func cancelPicker() {
+    override func cancelPicker() {
         hidePicker()
         restoreSelectedRows()
         selectedRows = nil
     }
 
-    func endPicker() {
+    override func endPicker() {
         hidePicker()
         delegate?.pickerView?(pickerView, didSelect: getSelectedRows())
         selectedRows = nil
-    }
-
-    func hidePicker() {
-        let screenSize = UIScreen.mainScreen().bounds.size
-        UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, self.parentViewHeight(), screenSize.width, 260.0)
-        }
     }
 
     internal func getSelectedRows() -> [Int] {
@@ -127,10 +98,6 @@ class PopUpPickerView: UIView {
         for i in 0..<selectedRows.count {
             pickerView.selectRow(selectedRows[i], inComponent: i, animated: true)
         }
-    }
-
-    private func parentViewHeight() -> CGFloat {
-        return superview?.frame.height ?? UIScreen.mainScreen().bounds.size.height
     }
 
 }
