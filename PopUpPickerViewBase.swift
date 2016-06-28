@@ -7,10 +7,6 @@
 //
 
 import UIKit
-#if !RX_NO_MODULE
-    import RxSwift
-    import RxCocoa
-#endif
 
 class PopUpPickerViewBase: UIView {
 
