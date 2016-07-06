@@ -1,21 +1,42 @@
 import UIKit
+#if !RX_NO_MODULE
+    import RxSwift
+    import RxCocoa
+#endif
 
-class PopUpPickerView: UIView {
+public enum PopUpPickerViewStyle
+{
+    case Default
+    case WithSegementedControl
+}
+
+class PopUpPickerView: PopUpPickerViewBase {
 
     var pickerView: UIPickerView!
-    var pickerToolbar: UIToolbar!
-    var toolbarItems = [UIBarButtonItem]()
+    lazy var itemSelected: Driver<[Int]> = {
+        return self.doneButtonItem.rx_tap.asDriver()
+            .map { _ in
+                self.hidePicker()
+                self.selectedRows = nil
+                return self.getSelectedRows()
+            }
+            .startWith(self.selectedRows ?? [])
+    }()
+    var segmentedControl: UISegmentedControl?
+    private var initSegementedControl: Bool = false
+    private let segementedControlHeight: CGFloat = 29
+    private let segementedControlSuperViewHeight: CGFloat = 29 + 16
 
     var delegate: PopUpPickerViewDelegate? {
         didSet {
             pickerView.delegate = delegate
         }
     }
-    private var selectedRows: [Int]?
+    internal var selectedRows: [Int]?
 
     // MARK: Initializer
-    init() {
-        super.init(frame: CGRect.zero)
+    override init() {
+        super.init()
         initFunc()
     }
 
@@ -29,67 +50,68 @@ class PopUpPickerView: UIView {
         initFunc()
     }
 
+    convenience init(rows: [Int], style: PopUpPickerViewStyle = .Default) {
+        self.init()
+        selectedRows = rows
+
+        if style == .WithSegementedControl {
+            let screenSize = UIScreen.mainScreen().bounds.size
+
+            let frame = pickerView.frame
+            pickerView.frame = CGRect(x: frame.origin.x, y: frame.origin.y + segementedControlSuperViewHeight, width: frame.size.width, height: frame.size.height)
+
+            // MARK:Add board view
+            let v = UIView(frame: CGRect(x: 0, y: 44, width: screenSize.width, height: segementedControlSuperViewHeight))
+            v.backgroundColor = UIColor.whiteColor()
+            self.addSubview(v)
+
+            let edge = UIEdgeInsets(top: 16, left: 16, bottom: 0, right: 16)
+            segmentedControl = UISegmentedControl(frame: CGRect(x: edge.left, y:edge.top, width: screenSize.width - (edge.left + edge.right), height: segementedControlHeight) )
+
+            v.addSubview(segmentedControl!)
+        }
+    }
+
     private func initFunc() {
         let screenSize = UIScreen.mainScreen().bounds.size
-        self.backgroundColor = UIColor.blackColor()
 
-        pickerToolbar = UIToolbar()
         pickerView = UIPickerView()
-
-        pickerToolbar.translucent = true
         pickerView.showsSelectionIndicator = true
         pickerView.backgroundColor = UIColor.whiteColor()
-
-        self.bounds = CGRectMake(0, 0, screenSize.width, 260)
-        self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260)
-        pickerToolbar.bounds = CGRectMake(0, 0, screenSize.width, 44)
-        pickerToolbar.frame = CGRectMake(0, 0, screenSize.width, 44)
         pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
         pickerView.frame = CGRectMake(0, 44, screenSize.width, 216)
-
-        let space = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FixedSpace, target: nil, action: nil)
-        space.width = 12
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Cancel, target: self, action: #selector(PopUpPickerView.cancelPicker))
-        let flexSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: self, action: nil)
-        let doneButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Done, target: self, action: #selector(PopUpPickerView.endPicker))
-        toolbarItems = [space, cancelItem, flexSpaceItem, doneButtonItem, space]
-
-        pickerToolbar.setItems(toolbarItems, animated: false)
-        self.addSubview(pickerToolbar)
         self.addSubview(pickerView)
     }
 
     // MARK: Actions
-    func showPicker() {
+    override func showPicker() {
         if selectedRows == nil {
             selectedRows = getSelectedRows()
         }
+        if let selectedRows = selectedRows {
+            for (component, row) in selectedRows.enumerate() {
+                pickerView.selectRow(row, inComponent: component, animated: false)
+            }
+        }
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, screenSize.height - 260.0, screenSize.width, 260.0)
+            self.frame = CGRectMake(0, self.parentViewHeight() - (260.0 + self.segementedControlSuperViewHeight), screenSize.width, 260.0 + self.segementedControlSuperViewHeight)
         }
     }
 
-    func cancelPicker() {
+    override func cancelPicker() {
         hidePicker()
         restoreSelectedRows()
         selectedRows = nil
     }
 
-    func endPicker() {
+    override func endPicker() {
         hidePicker()
         delegate?.pickerView?(pickerView, didSelect: getSelectedRows())
         selectedRows = nil
     }
 
-    private func hidePicker() {
-        let screenSize = UIScreen.mainScreen().bounds.size
-        UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, screenSize.height, screenSize.width, 260.0)
-        }
-    }
-
-    private func getSelectedRows() -> [Int] {
+    internal func getSelectedRows() -> [Int] {
         var selectedRows = [Int]()
         for i in 0..<pickerView.numberOfComponents {
             selectedRows.append(pickerView.selectedRowInComponent(i))
@@ -98,8 +120,9 @@ class PopUpPickerView: UIView {
     }
 
     private func restoreSelectedRows() {
-        for i in 0..<selectedRows!.count {
-            pickerView.selectRow(selectedRows![i], inComponent: i, animated: true)
+        guard let selectedRows = selectedRows else { return }
+        for i in 0..<selectedRows.count {
+            pickerView.selectRow(selectedRows[i], inComponent: i, animated: true)
         }
     }
 
