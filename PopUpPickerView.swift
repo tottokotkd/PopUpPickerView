@@ -4,6 +4,12 @@ import UIKit
     import RxCocoa
 #endif
 
+public enum PopUpPickerViewStyle
+{
+    case Default
+    case WithSegementedControl
+}
+
 class PopUpPickerView: PopUpPickerViewBase {
 
     var pickerView: UIPickerView!
@@ -16,6 +22,10 @@ class PopUpPickerView: PopUpPickerViewBase {
             }
             .startWith(self.selectedRows ?? [])
     }()
+    var segmentedControl: UISegmentedControl?
+    private var initSegementedControl: Bool = false
+    private let segementedControlHeight: CGFloat = 29
+    private let segementedControlSuperViewHeight: CGFloat = 29 + 16
 
     var delegate: PopUpPickerViewDelegate? {
         didSet {
@@ -40,9 +50,26 @@ class PopUpPickerView: PopUpPickerViewBase {
         initFunc()
     }
 
-    convenience init(rows: [Int]) {
+    convenience init(rows: [Int], style: PopUpPickerViewStyle = .Default) {
         self.init()
         selectedRows = rows
+
+        if style == .WithSegementedControl {
+            let screenSize = UIScreen.mainScreen().bounds.size
+
+            let frame = pickerView.frame
+            pickerView.frame = CGRect(x: frame.origin.x, y: frame.origin.y + segementedControlSuperViewHeight, width: frame.size.width, height: frame.size.height)
+
+            // MARK:Add board view
+            let v = UIView(frame: CGRect(x: 0, y: 44, width: screenSize.width, height: segementedControlSuperViewHeight))
+            v.backgroundColor = UIColor.whiteColor()
+            self.addSubview(v)
+
+            let edge = UIEdgeInsets(top: 16, left: 16, bottom: 0, right: 16)
+            segmentedControl = UISegmentedControl(frame: CGRect(x: edge.left, y:edge.top, width: screenSize.width - (edge.left + edge.right), height: segementedControlHeight) )
+
+            v.addSubview(segmentedControl!)
+        }
     }
 
     private func initFunc() {
@@ -53,7 +80,6 @@ class PopUpPickerView: PopUpPickerViewBase {
         pickerView.backgroundColor = UIColor.whiteColor()
         pickerView.bounds = CGRectMake(0, 0, screenSize.width, 216)
         pickerView.frame = CGRectMake(0, 44, screenSize.width, 216)
-
         self.addSubview(pickerView)
     }
 
@@ -69,7 +95,7 @@ class PopUpPickerView: PopUpPickerViewBase {
         }
         let screenSize = UIScreen.mainScreen().bounds.size
         UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, self.parentViewHeight() - 260.0, screenSize.width, 260.0)
+            self.frame = CGRectMake(0, self.parentViewHeight() - (260.0 + self.segementedControlSuperViewHeight), screenSize.width, 260.0 + self.segementedControlSuperViewHeight)
         }
     }
 
