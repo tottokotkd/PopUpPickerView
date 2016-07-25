@@ -94,8 +94,9 @@ class PopUpPickerView: PopUpPickerViewBase {
             }
         }
         let screenSize = UIScreen.mainScreen().bounds.size
+        let segmentedControlHeight: CGFloat = (segmentedControl != nil) ? self.segementedControlSuperViewHeight : 0
         UIView.animateWithDuration(0.2) {
-            self.frame = CGRectMake(0, self.parentViewHeight() - (260.0 + self.segementedControlSuperViewHeight), screenSize.width, 260.0 + self.segementedControlSuperViewHeight)
+            self.frame = CGRectMake(0, self.parentViewHeight() - (260.0 + segmentedControlHeight), screenSize.width, 260.0 + segmentedControlHeight)
         }
     }
 
